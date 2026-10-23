@@ -5,6 +5,8 @@ go 1.27.0
 toolchain go1.27.2
 
 require (
-	github.com/KLORQ/quarshell-core v0.4.1
+	github.com/KLORQ/quarshell-core v0.4.2
 	gopkg.in/yaml.v3 v3.0.1
 )
+
+require github.com/kr/text v0.2.0 // indirect
