@@ -18,6 +18,7 @@ func (p *Policy) Validate() error {
 	}
 	var violations []string
 	violations = append(violations, p.validateProcess()...)
+	violations = append(violations, p.validateLandlock()...)
 	violations = append(violations, p.validateFilesystem()...)
 	violations = append(violations, p.validateMiddlewares()...)
 	if p.NetworkPolicies.HasValue() {
@@ -275,7 +276,7 @@ func validateEndpoint(policyName string, endpoint NetworkEndpoint) []string {
 	if l7 == "mcp" && len(endpoint.Rules) == 0 && endpoint.Access == "" && !allowAll {
 		violations = append(violations, "protocol mcp requires rules when mcp.allow_all_known_mcp_methods is false")
 	}
-	if len(endpoint.Rules) > 0 && rulesWouldDenyAll(endpoint.Rules) && !(l7 == "mcp" && allowAll) {
+	if len(endpoint.Rules) > 0 && rulesWouldDenyAll(endpoint.Rules) && (l7 != "mcp" || !allowAll) {
 		violations = append(violations, "rules would deny all traffic (no allow clause found)")
 	}
 	if len(endpoint.DenyRules) > 0 && l7 == "" {

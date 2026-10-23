@@ -210,11 +210,7 @@ func endpointMatches(endpoint NetworkEndpoint, request NetworkRequest) bool {
 func denyMatches(endpoint NetworkEndpoint, request NetworkRequest) (bool, bool) {
 	supported := true
 	for _, rule := range endpoint.DenyRules {
-		matched, ruleSupported := matchL7(l7Fields{
-			Method: rule.Method, Path: rule.Path, Command: rule.Command,
-			OperationType: rule.OperationType, OperationName: rule.OperationName,
-			Fields: rule.Fields, Query: rule.Query, Tool: rule.Tool, Params: rule.Params,
-		}, endpoint.Protocol, request)
+		matched, ruleSupported := matchL7(l7Fields(rule), endpoint.Protocol, request)
 		if !ruleSupported {
 			supported = false
 			continue
