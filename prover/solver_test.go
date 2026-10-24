@@ -55,6 +55,27 @@ func TestCheckPortsContainedSolver(t *testing.T) {
 	}
 }
 
+func TestSymbolicReportDistinguishesUnsupportedAndInconclusive(t *testing.T) {
+	unsupported := domain.Wrap(domain.ErrUnsupported, "test.solver", "solver binary is unavailable")
+	contained, err := CheckPortsContained(context.Background(), []uint16{443}, []uint16{443}, &fakeSolver{err: unsupported})
+	if contained {
+		t.Fatal("solver error reported containment")
+	}
+	report := SymbolicReport(contained, err)
+	if report.Relation != Unsupported || report.Allows() {
+		t.Fatalf("unsupported solver report = %+v, want fail-closed unsupported", report)
+	}
+
+	contained, err = CheckPortsContained(context.Background(), []uint16{443}, []uint16{443}, &fakeSolver{err: errors.New("solver timed out")})
+	if contained {
+		t.Fatal("solver timeout reported containment")
+	}
+	report = SymbolicReport(contained, err)
+	if report.Relation != Inconclusive || report.Allows() {
+		t.Fatalf("inconclusive solver report = %+v, want fail-closed inconclusive", report)
+	}
+}
+
 func TestZ3Integration(t *testing.T) {
 	if _, err := exec.LookPath("z3"); err != nil {
 		t.Skip("z3 is not installed")

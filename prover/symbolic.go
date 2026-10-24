@@ -2,6 +2,7 @@ package prover
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"strings"
 
@@ -65,6 +66,9 @@ func buildPortScript(allowed, requested []uint16) string {
 // SymbolicReport formats a symbolic result for diagnostics.
 func SymbolicReport(contained bool, err error) Report {
 	if err != nil {
+		if errors.Is(err, domain.ErrUnsupported) {
+			return Report{Relation: Unsupported, Reasons: []string{err.Error()}}
+		}
 		return Report{Relation: Inconclusive, Reasons: []string{err.Error()}}
 	}
 	if contained {
